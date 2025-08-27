@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Abordagens PM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .app-header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        
+        .app-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e3c72;
+            text-align: center;
+        }
+        
+        .container {
+            padding: 20px;
+            max-width: 100%;
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .upload-zone {
+            border: 2px dashed #1e3c72;
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(30,60,114,0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .upload-zone:active {
+            transform: scale(0.98);
+            background: rgba(30,60,114,0.1);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+        }
+        
+        .batch-controls {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: rgba(30,60,114,0.05);
+            border-radius: 12px;
+        }
+        
+        .time-input {
+            padding: 12px 16px;
+            border: 2px solid #e0e7ff;
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .btn:active {
+            transform: scale(0.96);
+        }
+        
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        .image-card {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .image-preview {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .image-info {
+            padding: 8px;
+            font-size: 12px;
+            text-align: center;
+            background: white;
+        }
+        
+        .image-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #ef4444;
+            color: white;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .extracted-batch {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid #10b981;
+        }
+        
+        .extracted-batch h4 {
+            color: #065f46;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .extracted-item {
+            background: rgba(255,255,255,0.7);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #047857;
+        }
+        
+        .table-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .table-header {
+            background: #1e3c72;
+            color: white;
+            padding: 16px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .table-row {
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
+            animation: slideIn 0.3s ease;
+            position: relative;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .row-time {
+            font-weight: 700;
+            color: #1e3c72;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .row-details {
+            display: grid;
+            gap: 4px;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .row-label {
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .row-remove {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ef4444;
+            color: white;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .bottom-actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            right: 20px;
+            padding: 16px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .counter-badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+        }
+        
+        @media (max-width: 480px) {
+            .container { padding: 15px; }
+            .card { padding: 16px; }
+            .images-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <div class="app-title">🚔 REGISTRO DE ABORDAGENS</div>
+    </div>
+    
+    <div class="container">
+        <!-- Upload múltiplo -->
+        <div class="card">
+            <div class="upload-zone" onclick="document.getElementById('multipleFiles').click()">
+                <span class="upload-icon">📱</span>
+                <strong>Selecionar Múltiplos Prints</strong>
+                <p style="margin-top: 8px; color: #6b7280; font-size: 14px;">
+                    Toque para selecionar várias fotos
+                </p>
+                <input type="file" id="multipleFiles" accept="image/*" multiple style="display: none;">
+            </div>
+            
+            <!-- Hora base para ordenação -->
+            <div class="batch-controls">
+                <div>
+                    <label style="display: block; font-weight: 600; color: #1e3c72; margin-bottom: 4px; font-size: 14px;">
+                        ⏰ Hora da primeira abordagem:
+                    </label>
+                    <input type="time" id="baseTime" class="time-input">
+                </div>
+                <button onclick="processAllImages()" class="btn btn-success">
+                    🔄 Processar
+                </button>
+            </div>
+            
+            <!-- Preview das imagens selecionadas -->
+            <div id="imagesGrid" class="images-grid"></div>
+            
+            <!-- Dados extraídos em lote -->
+            <div id="extractedBatch"></div>
+        </div>
+        
+        <!-- Lista cronológica -->
+        <div class="table-container">
+            <div class="table-header">
+                📋 ABORDAGENS (ORDEM CRONOLÓGICA)
+                <span id="totalCounter" style="font-size: 14px; opacity: 0.8;"></span>
+            </div>
+            <div id="chronologicalList">
+                <div class="empty-state">
+                    <div class="empty-icon">⏰</div>
+                    <p>Nenhuma abordagem processada ainda</p>
+                    <p style="font-size: 12px; margin-top: 8px;">
+                        Selecione as imagens e defina a hora base
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div style="height: 80px;"></div>
+    </div>
+    
+    <!-- Botões inferiores -->
+    <div class="bottom-actions">
+        <button onclick="clearAll()" class="btn btn-warning">🗑️ Limpar Tudo</button>
+        <button onclick="exportChronological()" class="btn btn-primary">📊 Exportar CSV</button>
+    </div>
+    
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+    
+    <script>
+        let selectedImages = [];
+        let extractedAbordagens = [];
+        
+        // Dados simulados para diferentes prints
+        const simulatedData = [
+            {
+                condutor: 'RICARDO ISAIAS MINUNI DE LIMA',
+                cnh: '267.673.708-27',
+                placa: 'DQR8671',
+                modelo: 'GM/MERIVA MAXX'
+            },
+            {
+                condutor: 'MARIA SILVA DOS SANTOS',
+                cnh: '123.456.789-10',
+                placa: 'ABC1234',
+                modelo: 'FORD/KA SE'
+            },
+            {
+                condutor: 'JOÃO CARLOS OLIVEIRA',
+                cnh: '987.654.321-00',
+                placa: 'XYZ9876',
+                modelo: 'CHEVROLET/ONIX LT'
+            },
+            {
+                condutor: 'ANA PAULA FERREIRA',
+                cnh: '456.789.123-45',
+                placa: 'DEF5678',
+                modelo: 'VOLKSWAGEN/GOL G8'
+            },
+            {
+                condutor: 'PEDRO HENRIQUE COSTA',
+                cnh: '321.654.987-89',
+                placa: 'GHI9012',
+                modelo: 'FIAT/PALIO FIRE'
+            }
+        ];
+        
+        // Inicializar app
+        document.addEventListener('DOMContentLoaded', function() {
+            setCurrentTime();
+            setupFileUpload();
+        });
+        
+        function setCurrentTime() {
+            const now = new Date().toTimeString().slice(0,5);
+            document.getElementById('baseTime').value = now;
+        }
+        
+        function setupFileUpload() {
+            const fileInput = document.getElementById('multipleFiles');
+            fileInput.addEventListener('change', function(e) {
+                handleMultipleFiles(e.target.files);
+            });
+        }
+        
+        function handleMultipleFiles(files) {
+            selectedImages = [];
+            const imagesGrid = document.getElementById('imagesGrid');
+            const extractedBatch = document.getElementById('extractedBatch');
+            
+            imagesGrid.innerHTML = '';
+            extractedBatch.innerHTML = '';
+            
+            Array.from(files).forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const imageData = {
+                        id: index,
+                        file: file,
+                        url: URL.createObjectURL(file),
+                        name: file.name
+                    };
+                    
+                    selectedImages.push(imageData);
+                    
+                    // Criar card da imagem
+                    const imageCard = document.createElement('div');
+                    imageCard.className = 'image-card';
+                    imageCard.innerHTML = `
+                        <img src="${imageData.url}" class="image-preview" alt="Print ${index + 1}">
+                        <div class="image-info">
+                            Print ${index + 1}
+                        </div>
+                        <button class="image-remove" onclick="removeImage(${index})">×</button>
+                    `;
+                    
+                    imagesGrid.appendChild(imageCard);
+                }
+            });
+            
+            if (selectedImages.length > 0) {
+                showToast(`${selectedImages.length} imagens selecionadas`, 'success');
+            }
+        }
+        
+        function removeImage(index) {
+            selectedImages = selectedImages.filter(img => img.id !== index);
+            
+            // Recriar grid
+            const imagesGrid = document.getElementById('imagesGrid');
+            imagesGrid.innerHTML = '';
+            
+            selectedImages.forEach((imageData, newIndex) => {
+                imageData.id = newIndex; // Reatribuir IDs
+                
+                const imageCard = document.createElement('div');
+                imageCard.className = 'image-card';
+                imageCard.innerHTML = `
+                    <img src="${imageData.url}" class="image-preview" alt="Print ${newIndex + 1}">
+                    <div class="image-info">
+                        Print ${newIndex + 1}
+                    </div>
+                    <button class="image-remove" onclick="removeImage(${newIndex})">×</button>
+                `;
+                
+                imagesGrid.appendChild(imageCard);
+            });
+        }
+        
+        function processAllImages() {
+            if (selectedImages.length === 0) {
+                showToast('Selecione pelo menos uma imagem!', 'error');
+                return;
+            }
+            
+            const baseTime = document.getElementById('baseTime').value;
+            if (!baseTime) {
+                showToast('Defina a hora base!', 'error');
+                return;
+            }
+            
+            const extractedBatch = document.getElementById('extractedBatch');
+            extractedBatch.innerHTML = '<h4>🔄 Processando imagens...</h4>';
+            
+            // Simular processamento
+            setTimeout(() => {
+                extractedAbordagens = [];
+                
+                selectedImages.forEach((imageData, index) => {
+                    // Calcular horário (incrementar 5 minutos para cada imagem)
+                    const [hours, minutes] = baseTime.split(':').map(Number);
+                    const totalMinutes = hours * 60 + minutes + (index * 5);
+                    const newHours = Math.floor(totalMinutes / 60) % 24;
+                    const newMinutes = totalMinutes % 60;
+                    const calculatedTime = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+                    
+                    // Simular extração de dados (usar dados simulados)
+                    const dataIndex = index % simulatedData.length;
+                    const simulatedExtraction = simulatedData[dataIndex];
+                    
+                    const abordagem = {
+                        id: Date.now() + index,
+                        hora: calculatedTime,
+                        modelo: simulatedExtraction.modelo,
+                        placa: simulatedExtraction.placa,
+                        condutor: simulatedExtraction.condutor,
+                        cnh: simulatedExtraction.cnh,
+                        originalIndex: index
+                    };
+                    
+                    extractedAbordagens.push(abordagem);
+                });
+                
+                // Ordenar por horário
+                extractedAbordagens.sort((a, b) => a.hora.localeCompare(b.hora));
+                
+                showExtractedBatch();
+                updateChronologicalList();
+                showToast(`${extractedAbordagens.length} abordagens processadas!`, 'success');
+            }, 2000);
+        }
+        
+        function showExtractedBatch() {
+            const extractedBatch = document.getElementById('extractedBatch');
+            
+            let html = `
+                <div class="extracted-batch">
+                    <h4>✅ ${extractedAbordagens.length} ABORDAGENS EXTRAÍDAS</h4>
+            `;
+            
+            extractedAbordagens.forEach((abordagem, index) => {
+                html += `
+                    <div class="extracted-item">
+                        <strong>${abordagem.hora}</strong> - ${abordagem.condutor}<br>
+                        <strong>Veículo:</strong> ${abordagem.modelo} | ${abordagem.placa}<br>
+                        <strong>CNH:</strong> ${abordagem.cnh}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            extractedBatch.innerHTML = html;
+        }
+        
+        function updateChronologicalList() {
+            const lista = document.getElementById('chronologicalList');
+            const counter = document.getElementById('totalCounter');
+            
+            if (extractedAbordagens.length === 0) {
+                lista.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⏰</div>
+                        <p>Nenhuma abordagem processada ainda</p>
+                    </div>
+                `;
+                counter.textContent = '';
+                return;
+            }
+            
+            counter.textContent = `(${extractedAbordagens.length} registros)`;
+            
+            lista.innerHTML = '';
+            
+            extractedAbordagens.forEach((abordagem) => {
+                const div = document.createElement('div');
+                div.className = 'table-row';
+                div.innerHTML = `
+                    <div class="row-time">⏰ ${abordagem.hora}</div>
+                    <div class="row-details">
+                        <div><span class="row-label">MODELO:</span> ${abordagem.modelo}</div>
+                        <div><span class="row-label">PLACA:</span> ${abordagem.placa}</div>
+                        <div><span class="row-label">CONDUTOR:</span> ${abordagem.condutor}</div>
+                        <div><span class="row-label">CNH:</span> ${abordagem.cnh}</div>
+                    </div>
+                    <button class="row-remove" onclick="removeAbordagem(${abordagem.id})">×</button>
+                `;
+                
+                lista.appendChild(div);
+            });
+        }
+        
+        function removeAbordagem(id) {
+            if (confirm('Remover esta abordagem?')) {
+                extractedAbordagens = extractedAbordagens.filter(a => a.id !== id);
+                updateChronologicalList();
+                showToast('Abordagem removida!', 'success');
+            }
+        }
+        
+        function clearAll() {
+            if (confirm('Limpar todas as abordagens e imagens?')) {
+                selectedImages = [];
+                extractedAbordagens = [];
+                
+                document.getElementById('imagesGrid').innerHTML = '';
+                document.getElementById('extractedBatch').innerHTML = '';
+                document.getElementById('multipleFiles').value = '';
+                
+                updateChronologicalList();
+                setCurrentTime();
+                
+                showToast('Tudo limpo!', 'success');
+            }
+        }
+        
+        function exportChronological() {
+            if (extractedAbordagens.length === 0) {
+                showToast('Nenhum dado para exportar!', 'error');
+                return;
+            }
+            
+            let csv = 'HORA;MODELO;PLACA;CONDUTOR;CNH\n';
+            
+            extractedAbordagens.forEach(abordagem => {
+                csv += `${abordagem.hora};${abordagem.modelo};${abordagem.placa};${abordagem.condutor};${abordagem.cnh}\n`;
+            });
+            
+            // Download do arquivo
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `abordagens_cronologicas_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            showToast('CSV exportado com sucesso!', 'success');
+        }
+        
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast toast-${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
